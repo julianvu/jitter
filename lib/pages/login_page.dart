@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:jitter/pages/signup_page.dart';
 import 'package:jitter/pages/splash_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
-import 'package:jitter/widgets/login_field.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,13 +15,34 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   FirebaseAuthService authService = FirebaseAuthService();
 
+  static final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    void _showSnackBar() {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text(
+            "Incorrect credentials",
+            style: Theme.of(context).textTheme.body1.apply(color: Colors.red),
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
     return Scaffold(
-      body: Center(
-        child: Container(
-          child: SingleChildScrollView(
-            child: Padding(
+      key: _scaffoldKey,
+      body: Form(
+        key: _loginFormKey,
+        child: Center(
+          child: Container(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(36.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -53,8 +73,6 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             );
                           }
-                        } else {
-                          print(user);
                         }
                       },
                       elevation: 10.0,
@@ -122,16 +140,94 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Container(
                     margin: EdgeInsets.only(top: 20.0),
-                    child: LoginField(false),
+                    child: Material(
+                      elevation: 10.0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15.0),
+                        ),
+                      ),
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                        child: TextFormField(
+                          validator: (value) {
+                            Pattern pattern =
+                                r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                            RegExp regex = new RegExp(pattern);
+                            if (!regex.hasMatch(value)) {
+                              return 'Please enter a valid e-mail';
+                            }
+
+                            return null;
+                          },
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: "E-mail",
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   Container(
                     margin: EdgeInsets.only(top: 20.0),
-                    child: LoginField(true),
+                    child: Material(
+                      elevation: 10.0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15.0),
+                        ),
+                      ),
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return "Please enter a password";
+                            } else {
+                              return null;
+                            }
+                          },
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                              border: InputBorder.none, labelText: "Password"),
+                        ),
+                      ),
+                    ),
                   ),
+
+                  /**
+                   * Sign in button
+                   */
                   Container(
                     margin: EdgeInsets.only(top: 20.0),
                     child: RawMaterialButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        FirebaseAuthService authService = FirebaseAuthService();
+                        if (_loginFormKey.currentState.validate()) {
+                          _loginFormKey.currentState.save();
+
+                          FirebaseUser tempUser =
+                              await authService.signInWithEmailAndPassword(
+                                  _emailController.text,
+                                  _passwordController.text);
+                          if (tempUser != null) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => Mock(),
+                              ),
+                            );
+                          } else {
+                            _showSnackBar();
+                          }
+                        }
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Icon(
@@ -143,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                       fillColor: Theme.of(context).primaryColor,
                       splashColor: Theme.of(context).accentColor,
                     ),
-                  ),
+                  )
                 ],
               ),
             ),

@@ -18,9 +18,13 @@ class FirebaseAuthService {
 
   Future<FirebaseUser> signInWithEmailAndPassword(
       String email, String password) async {
-    final AuthResult authResult = await _firebaseAuth.signInWithCredential(
-        EmailAuthProvider.getCredential(email: email, password: password));
-    return authResult.user;
+    try {
+      final AuthResult authResult = await _firebaseAuth.signInWithCredential(
+          EmailAuthProvider.getCredential(email: email, password: password));
+      return authResult.user;
+    } on PlatformException catch (e) {
+      return null;
+    }
   }
 
   Future<FirebaseUser> createUserWithEmailAndPassword(
