@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:jitter/pages/add_coffee.dart';
 import 'package:jitter/pages/signup_page.dart';
-import 'package:jitter/pages/splash_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (tempUser != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => Mock(),
+                                builder: (context) => AddCoffee(),
                               ),
                             );
                           }
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (tempUser != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => Mock(),
+                                builder: (context) => AddCoffee(),
                               ),
                             );
                           } else {
