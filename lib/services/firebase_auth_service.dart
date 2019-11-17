@@ -1,37 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  static final FirebaseAuthService _instance = FirebaseAuthService._internal();
+  final Firestore _db = Firestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  factory FirebaseAuthService() {
-    return _instance;
-  }
-
-  FirebaseAuthService._internal();
-
-  Stream<FirebaseUser> get onAuthStateChanged {
+  Future<FirebaseUser> get getUser => _firebaseAuth.currentUser();
+  Stream<FirebaseUser> get user {
     return _firebaseAuth.onAuthStateChanged;
   }
 
   Future<FirebaseUser> signInWithEmailAndPassword(
       String email, String password) async {
     try {
-      final AuthResult authResult = await _firebaseAuth.signInWithCredential(
-          EmailAuthProvider.getCredential(email: email, password: password));
-      return authResult.user;
+      final AuthCredential credential =
+          EmailAuthProvider.getCredential(email: email, password: password);
+
+      FirebaseUser user =
+          (await _firebaseAuth.signInWithCredential(credential)).user;
+      updateUserData(user);
+
+      return user;
     } on PlatformException catch (e) {
+      print(e);
       return null;
     }
   }
 
   Future<FirebaseUser> createUserWithEmailAndPassword(
       String email, String password) async {
-    final AuthResult authResult = await _firebaseAuth
-        .createUserWithEmailAndPassword(email: email, password: password);
-    return authResult.user;
+    FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(
+            email: email, password: password))
+        .user;
+    updateUserData(user);
+    return user;
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
@@ -39,40 +44,37 @@ class FirebaseAuthService {
   }
 
   Future<FirebaseUser> signInWithGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    final GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    try {
+      GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
+      GoogleSignInAuthentication googleAuth =
+          await googleSignInAccount.authentication;
 
-    if (googleUser != null) {
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      if (googleAuth.accessToken != null && googleAuth.idToken != null) {
-        final AuthResult authResult = await _firebaseAuth.signInWithCredential(
-            GoogleAuthProvider.getCredential(
-                idToken: googleAuth.idToken,
-                accessToken: googleAuth.accessToken));
-        return authResult.user;
-      } else {
-        throw PlatformException(
-          code: "ERROR_MISSING_GOOGLE_AUTH_TOKEN",
-          message: "Missing Google Auth Token",
-        );
-      }
-    } else {
-      throw PlatformException(
-        code: "ERROR_ABORTED_BY_USER",
-        message: "Sign in aborted by user",
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleAuth.idToken,
+        accessToken: googleAuth.accessToken,
       );
+
+      FirebaseUser user =
+          (await _firebaseAuth.signInWithCredential(credential)).user;
+      updateUserData(user);
+
+      return user;
+    } catch (error) {
+      print(error);
+      return null;
     }
   }
 
-  Future<FirebaseUser> currentUser() async {
-    final FirebaseUser user = await _firebaseAuth.currentUser();
-    return user;
+  Future<void> signOut() {
+    return _firebaseAuth.signOut();
   }
 
-  Future<void> signOut() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    await googleSignIn.signOut();
-    return _firebaseAuth.signOut();
+  Future<void> updateUserData(FirebaseUser user) {
+    DocumentReference reportRef = _db.collection("reports").document(user.uid);
+
+    return reportRef.setData({
+      "uid": user.uid,
+      "lastActivity": DateTime.now(),
+    }, merge: true);
   }
 }

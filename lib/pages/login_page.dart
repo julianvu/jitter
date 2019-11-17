@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:jitter/pages/add_coffee.dart';
+import 'package:jitter/pages/home_page.dart';
 import 'package:jitter/pages/signup_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
-import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -62,17 +61,14 @@ class _LoginPageState extends State<LoginPage> {
                     margin: EdgeInsets.only(top: 20.0),
                     child: MaterialButton(
                       onPressed: () async {
-                        FirebaseUser user = Provider.of<FirebaseUser>(context);
-                        if (user == null) {
-                          FirebaseUser tempUser =
-                              await authService.signInWithGoogle();
-                          if (tempUser != null) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => AddCoffee(),
-                              ),
-                            );
-                          }
+                        FirebaseUser user =
+                            await authService.signInWithGoogle();
+                        if (user != null) {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(),
+                            ),
+                          );
                         }
                       },
                       elevation: 10.0,
@@ -209,18 +205,17 @@ class _LoginPageState extends State<LoginPage> {
                     margin: EdgeInsets.only(top: 20.0),
                     child: RawMaterialButton(
                       onPressed: () async {
-                        FirebaseAuthService authService = FirebaseAuthService();
                         if (_loginFormKey.currentState.validate()) {
                           _loginFormKey.currentState.save();
 
-                          FirebaseUser tempUser =
+                          FirebaseUser user =
                               await authService.signInWithEmailAndPassword(
                                   _emailController.text,
                                   _passwordController.text);
-                          if (tempUser != null) {
+                          if (user != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => AddCoffee(),
+                                builder: (context) => HomePage(),
                               ),
                             );
                           } else {

@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider<FirebaseUser>.value(
-          value: FirebaseAuthService().onAuthStateChanged,
+          value: FirebaseAuthService().user,
         )
       ],
       child: MaterialApp(
@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xFFfbe1b6),
           scaffoldBackgroundColor: Color(0xFFfbe1b6),
           splashColor: Color(0xFFfbac91),
+          bottomAppBarColor: Color(0xFFa7efe9),
 
           /*
           Typography

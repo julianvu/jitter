@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jitter/pages/splash_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
@@ -8,6 +9,8 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  FirebaseAuthService _authService = FirebaseAuthService();
+
   TextEditingController _emailController = TextEditingController();
 
   TextEditingController _passwordController = TextEditingController();
@@ -163,18 +166,20 @@ class _SignUpPageState extends State<SignUpPage> {
                         margin: EdgeInsets.only(top: 20.0),
                         child: RawMaterialButton(
                           onPressed: () async {
-                            FirebaseAuthService authService =
-                                FirebaseAuthService();
                             if (_signUpFormKey.currentState.validate()) {
                               _signUpFormKey.currentState.save();
-                              authService.createUserWithEmailAndPassword(
-                                  _emailController.text,
-                                  _passwordController.text);
-                              Navigator.of(context).pushReplacement(
-                                (MaterialPageRoute(
-                                  builder: (context) => Mock(),
-                                )),
-                              );
+
+                              FirebaseUser user = await _authService
+                                  .createUserWithEmailAndPassword(
+                                      _emailController.text,
+                                      _passwordController.text);
+                              if (user != null) {
+                                Navigator.of(context).pushReplacement(
+                                  (MaterialPageRoute(
+                                    builder: (context) => Mock(),
+                                  )),
+                                );
+                              }
                             } else {
                               setState(() {
                                 _autoValidate = true;
