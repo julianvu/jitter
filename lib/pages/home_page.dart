@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jitter/models/report.dart';
 import 'package:jitter/pages/login_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
+import 'package:jitter/services/globals.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,6 +20,13 @@ class _HomePageState extends State<HomePage> {
         context: context,
         builder: (context) => OptionsBottomSheet(),
         backgroundColor: Colors.transparent);
+  }
+
+  Future<void> _addCoffee() {
+    return Global.reportRef.upsert({
+      "totalCoffees": FieldValue.increment(1),
+      "lastActivity": DateTime.now(),
+    });
   }
 
   @override
@@ -67,8 +76,17 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             report != null
-                ? Text("${report.totalCoffees.toString()}")
-                : Text("No coffees")
+                ? Text(
+                    "${report.totalCoffees.toString()}",
+                    style: TextStyle(fontSize: 128.0),
+                  )
+                : Text("No coffees"),
+            RaisedButton(
+              onPressed: () {
+                _addCoffee();
+              },
+              child: Text("Add Coffee"),
+            ),
           ],
         ),
       ),
