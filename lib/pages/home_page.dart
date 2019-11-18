@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jitter/models/report.dart';
 import 'package:jitter/pages/login_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -20,52 +22,54 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(canvasColor: Colors.red),
-      child: Scaffold(
-        bottomNavigationBar: Card(
-          margin: EdgeInsets.all(8.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
+    Report report = Provider.of<Report>(context);
+
+    return Scaffold(
+      bottomNavigationBar: Card(
+        margin: EdgeInsets.only(bottom: 0.0, left: 4.0, right: 4.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15.0),
+            topRight: Radius.circular(15.0),
           ),
-          elevation: 10.0,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15.0),
-            child: BottomAppBar(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(FontAwesomeIcons.coffee),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(FontAwesomeIcons.chartBar),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(FontAwesomeIcons.cog),
-                    onPressed: () {
-                      _showModalBottomSheet();
-                    },
-                  ),
-                ],
-              ),
+        ),
+        elevation: 10.0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15.0),
+            topRight: Radius.circular(15.0),
+          ),
+          child: BottomAppBar(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(FontAwesomeIcons.coffee),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(FontAwesomeIcons.chartBar),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(FontAwesomeIcons.cog),
+                  onPressed: () {
+                    _showModalBottomSheet();
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        body: Center(
-          child: FlatButton(
-            child: Text("Sign Out"),
-            onPressed: () async {
-              await _authService.signOut();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => LoginPage(),
-                ),
-              );
-            },
-          ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            report != null
+                ? Text("${report.totalCoffees.toString()}")
+                : Text("No coffees")
+          ],
         ),
       ),
     );

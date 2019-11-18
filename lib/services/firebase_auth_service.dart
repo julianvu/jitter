@@ -66,6 +66,7 @@ class FirebaseAuthService {
   }
 
   Future<void> signOut() {
+    _googleSignIn.signOut();
     return _firebaseAuth.signOut();
   }
 

@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:jitter/models/report.dart';
 import 'package:jitter/pages/splash_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
+import 'package:jitter/services/globals.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
@@ -14,7 +16,10 @@ class MyApp extends StatelessWidget {
       providers: [
         StreamProvider<FirebaseUser>.value(
           value: FirebaseAuthService().user,
-        )
+        ),
+        StreamProvider<Report>.value(
+          value: Global.reportRef.documentStream,
+        ),
       ],
       child: MaterialApp(
         title: 'Jitter',
