@@ -12,8 +12,23 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   FirebaseAuthService _authService = FirebaseAuthService();
+
+  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: 2);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _showModalBottomSheet() {
     showModalBottomSheet(
@@ -54,11 +69,15 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 IconButton(
                   icon: Icon(FontAwesomeIcons.coffee),
-                  onPressed: () {},
+                  onPressed: () {
+                    _tabController.index = 0;
+                  },
                 ),
                 IconButton(
                   icon: Icon(FontAwesomeIcons.chartBar),
-                  onPressed: () {},
+                  onPressed: () {
+                    _tabController.index = 1;
+                  },
                 ),
                 IconButton(
                   icon: Icon(FontAwesomeIcons.cog),
@@ -71,24 +90,32 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            report != null
-                ? Text(
-                    "${report.totalCoffees.toString()}",
-                    style: TextStyle(fontSize: 128.0),
-                  )
-                : Text("No coffees"),
-            RaisedButton(
-              onPressed: () {
-                _addCoffee();
-              },
-              child: Text("Add Coffee"),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                report != null
+                    ? Text(
+                        "${report.totalCoffees.toString()}",
+                        style: TextStyle(fontSize: 128.0),
+                      )
+                    : Text("No coffees"),
+                RaisedButton(
+                  onPressed: () {
+                    _addCoffee();
+                  },
+                  child: Text("Add Coffee"),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            color: Colors.blue,
+          ),
+        ],
       ),
     );
   }
