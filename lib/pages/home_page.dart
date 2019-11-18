@@ -70,14 +70,24 @@ class _HomePageState extends State<HomePage>
                 IconButton(
                   icon: Icon(FontAwesomeIcons.coffee),
                   onPressed: () {
-                    _tabController.index = 0;
+                    setState(() {
+                      _tabController.index = 0;
+                    });
                   },
+                  color: _tabController.index == 0
+                      ? Theme.of(context).splashColor
+                      : Colors.black,
                 ),
                 IconButton(
                   icon: Icon(FontAwesomeIcons.chartBar),
                   onPressed: () {
-                    _tabController.index = 1;
+                    setState(() {
+                      _tabController.index = 1;
+                    });
                   },
+                  color: _tabController.index == 1
+                      ? Theme.of(context).splashColor
+                      : Colors.black,
                 ),
                 IconButton(
                   icon: Icon(FontAwesomeIcons.cog),
