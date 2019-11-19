@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:jitter/pages/home_page.dart';
-import 'package:jitter/pages/signup_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -64,10 +62,8 @@ class _LoginPageState extends State<LoginPage> {
                         FirebaseUser user =
                             await authService.signInWithGoogle();
                         if (user != null) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => HomePage(),
-                            ),
+                          Navigator.of(context).pushReplacementNamed(
+                            "/home",
                           );
                         }
                       },
@@ -104,8 +100,8 @@ class _LoginPageState extends State<LoginPage> {
                     margin: EdgeInsets.only(top: 20.0),
                     child: MaterialButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => SignUpPage()),
+                        Navigator.of(context).pushNamed(
+                          "/signup",
                         );
                       },
                       elevation: 10.0,
@@ -213,10 +209,8 @@ class _LoginPageState extends State<LoginPage> {
                                   _emailController.text,
                                   _passwordController.text);
                           if (user != null) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(),
-                              ),
+                            Navigator.of(context).pushReplacementNamed(
+                              "/home",
                             );
                           } else {
                             _showSnackBar();

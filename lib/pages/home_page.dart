@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jitter/models/report.dart';
-import 'package:jitter/pages/login_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 import 'package:jitter/services/globals.dart';
 import 'package:provider/provider.dart';
@@ -101,6 +100,7 @@ class _HomePageState extends State<HomePage>
         ),
       ),
       body: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
         children: [
           Center(
@@ -154,12 +154,7 @@ class OptionsBottomSheet extends StatelessWidget {
               title: Text("Log Out"),
               onTap: () async {
                 await _authService.signOut();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage(),
-                  ),
-                );
+                Navigator.of(context).popAndPushNamed("/");
               },
             ),
           ),

@@ -1,14 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jitter/models/report.dart';
-import 'package:jitter/pages/splash_page.dart';
+import 'package:jitter/pages/home_page.dart';
+import 'package:jitter/pages/login_page.dart';
+import 'package:jitter/pages/signup_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 import 'package:jitter/services/globals.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  final FirebaseUser _user = await FirebaseAuthService().getUser;
+  final String initialRoute = _user == null ? "/" : "/home";
+  runApp(MyApp(
+    initialRoute: initialRoute,
+  ));
+}
 
 class MyApp extends StatelessWidget {
+  final String initialRoute;
+
+  MyApp({this.initialRoute});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -55,7 +67,12 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: SplashPage(),
+        routes: {
+          "/": (context) => LoginPage(),
+          "/home": (context) => HomePage(),
+          "/signup": (context) => SignUpPage(),
+        },
+        initialRoute: initialRoute,
       ),
     );
   }

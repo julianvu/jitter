@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:jitter/pages/splash_page.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -174,10 +173,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                       _emailController.text,
                                       _passwordController.text);
                               if (user != null) {
-                                Navigator.of(context).pushReplacement(
-                                  (MaterialPageRoute(
-                                    builder: (context) => Mock(),
-                                  )),
+                                Navigator.of(context).pushReplacementNamed(
+                                  "/home",
                                 );
                               }
                             } else {
