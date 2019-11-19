@@ -19,6 +19,19 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
+  bool _isLoading;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = false;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     void _showSnackBar() {
@@ -200,28 +213,39 @@ class _LoginPageState extends State<LoginPage> {
                   Container(
                     margin: EdgeInsets.only(top: 20.0),
                     child: RawMaterialButton(
-                      onPressed: () async {
-                        if (_loginFormKey.currentState.validate()) {
-                          _loginFormKey.currentState.save();
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
 
-                          FirebaseUser user =
-                              await authService.signInWithEmailAndPassword(
-                                  _emailController.text,
-                                  _passwordController.text);
-                          if (user != null) {
-                            Navigator.of(context).pushReplacementNamed(
-                              "/home",
-                            );
-                          } else {
-                            _showSnackBar();
-                          }
-                        }
-                      },
+                              if (_loginFormKey.currentState.validate()) {
+                                _loginFormKey.currentState.save();
+
+                                FirebaseUser user = await authService
+                                    .signInWithEmailAndPassword(
+                                        _emailController.text,
+                                        _passwordController.text);
+                                if (user != null) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                    "/home",
+                                  );
+                                } else {
+                                  _showSnackBar();
+                                }
+                              }
+                            },
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
-                        child: Icon(
-                          Icons.arrow_forward,
-                        ),
+                        child: _isLoading
+                            ? CircularProgressIndicator(
+                                backgroundColor: Theme.of(context).splashColor,
+                                strokeWidth: 4.0,
+                              )
+                            : Icon(
+                                Icons.arrow_forward,
+                              ),
                       ),
                       shape: CircleBorder(),
                       elevation: 2.0,
