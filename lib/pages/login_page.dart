@@ -216,11 +216,10 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _isLoading
                           ? null
                           : () async {
-                              setState(() {
-                                _isLoading = true;
-                              });
-
                               if (_loginFormKey.currentState.validate()) {
+                                setState(() {
+                                  _isLoading = true;
+                                });
                                 _loginFormKey.currentState.save();
 
                                 FirebaseUser user = await authService
