@@ -9,8 +9,12 @@ import 'package:jitter/services/globals.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+  // Needed in order to run because main() is async
+  WidgetsFlutterBinding.ensureInitialized();
+
   final FirebaseUser _user = await FirebaseAuthService().getUser;
   final String initialRoute = _user == null ? "/" : "/home";
+
   runApp(MyApp(
     initialRoute: initialRoute,
   ));
