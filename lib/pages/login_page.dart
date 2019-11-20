@@ -240,7 +240,6 @@ class _LoginPageState extends State<LoginPage> {
                         child: _isLoading
                             ? CircularProgressIndicator(
                                 backgroundColor: Theme.of(context).splashColor,
-                                strokeWidth: 4.0,
                               )
                             : Icon(
                                 Icons.arrow_forward,

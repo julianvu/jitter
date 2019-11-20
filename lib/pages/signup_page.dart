@@ -19,6 +19,19 @@ class _SignUpPageState extends State<SignUpPage> {
   final GlobalKey<FormState> _signUpFormKey = GlobalKey<FormState>();
   bool _autoValidate = false;
 
+  bool _isLoading;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = false;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,30 +177,41 @@ class _SignUpPageState extends State<SignUpPage> {
                       Container(
                         margin: EdgeInsets.only(top: 20.0),
                         child: RawMaterialButton(
-                          onPressed: () async {
-                            if (_signUpFormKey.currentState.validate()) {
-                              _signUpFormKey.currentState.save();
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  if (_signUpFormKey.currentState.validate()) {
+                                    setState(() {
+                                      _isLoading = true;
+                                    });
+                                    _signUpFormKey.currentState.save();
 
-                              FirebaseUser user = await _authService
-                                  .createUserWithEmailAndPassword(
-                                      _emailController.text,
-                                      _passwordController.text);
-                              if (user != null) {
-                                Navigator.of(context).pushReplacementNamed(
-                                  "/home",
-                                );
-                              }
-                            } else {
-                              setState(() {
-                                _autoValidate = true;
-                              });
-                            }
-                          },
+                                    FirebaseUser user = await _authService
+                                        .createUserWithEmailAndPassword(
+                                            _emailController.text,
+                                            _passwordController.text);
+                                    if (user != null) {
+                                      Navigator.of(context)
+                                          .pushNamedAndRemoveUntil(
+                                        "/home",
+                                        (Route<dynamic> route) => false,
+                                      );
+                                    }
+                                  } else {
+                                    setState(() {
+                                      _autoValidate = true;
+                                    });
+                                  }
+                                },
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
-                            child: Icon(
-                              Icons.arrow_forward,
-                            ),
+                            child: _isLoading
+                                ? CircularProgressIndicator(
+                                    backgroundColor:
+                                        Theme.of(context).splashColor)
+                                : Icon(
+                                    Icons.arrow_forward,
+                                  ),
                           ),
                           shape: CircleBorder(),
                           elevation: 2.0,

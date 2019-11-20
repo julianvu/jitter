@@ -154,7 +154,8 @@ class OptionsBottomSheet extends StatelessWidget {
               title: Text("Log Out"),
               onTap: () async {
                 await _authService.signOut();
-                Navigator.of(context).popAndPushNamed("/");
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacementNamed("/");
               },
             ),
           ),
