@@ -1,6 +1,10 @@
+import 'dart:convert' as convert;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:jitter/models/report.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 import 'package:jitter/services/globals.dart';
@@ -21,6 +25,28 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 2);
+    getJSONData();
+  }
+
+  Future<String> getAccessKey() async {
+    RemoteConfig _remoteConfig = await RemoteConfig.instance;
+    await _remoteConfig.fetch(expiration: Duration(seconds: 0));
+    await _remoteConfig.activateFetched();
+    return _remoteConfig.getString("unsplashAccessKey");
+  }
+
+  void getJSONData() async {
+    String url = "https://api.unsplash.com/search/photos?page=1&query=coffee";
+    String key = "&client_id=${await getAccessKey()}";
+    // Await HTTP GET response, then decode JSON-formatted response
+    http.Response response = await http.get(url + key);
+    if (response.statusCode == 200) {
+      var jsonResponse = convert.jsonDecode(response.body);
+      int itemCount = jsonResponse["total"];
+      print("Number of images about coffee: $itemCount.");
+    } else {
+      print("Request failed with status: ${response.statusCode}.");
+    }
   }
 
   @override
