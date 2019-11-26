@@ -1,5 +1,6 @@
 import 'dart:convert' as convert;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +22,17 @@ class _HomePageState extends State<HomePage>
 
   TabController _tabController;
 
+  List data;
+
+  PageController _favoritesController;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 2);
     getJSONData();
+    _favoritesController =
+        PageController(initialPage: 1, viewportFraction: 0.6);
   }
 
   Future<String> getAccessKey() async {
@@ -38,12 +45,16 @@ class _HomePageState extends State<HomePage>
   void getJSONData() async {
     String url = "https://api.unsplash.com/search/photos?page=1&query=coffee";
     String key = "&client_id=${await getAccessKey()}";
+
     // Await HTTP GET response, then decode JSON-formatted response
     http.Response response = await http.get(url + key);
     if (response.statusCode == 200) {
       var jsonResponse = convert.jsonDecode(response.body);
       int itemCount = jsonResponse["total"];
       print("Number of images about coffee: $itemCount.");
+      setState(() {
+        data = jsonResponse["results"];
+      });
     } else {
       print("Request failed with status: ${response.statusCode}.");
     }
@@ -52,6 +63,7 @@ class _HomePageState extends State<HomePage>
   @override
   void dispose() {
     _tabController.dispose();
+    _favoritesController.dispose();
     super.dispose();
   }
 
@@ -130,27 +142,122 @@ class _HomePageState extends State<HomePage>
         controller: _tabController,
         children: [
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: ListView(
               children: <Widget>[
-                report != null
-                    ? Text(
-                        "${report.totalCoffees.toString()}",
-                        style: TextStyle(fontSize: 128.0),
-                      )
-                    : Text("No coffees"),
-                RaisedButton(
-                  onPressed: () {
-                    _addCoffee();
-                  },
-                  child: Text("Add Coffee"),
+                Center(
+                  child: report != null
+                      ? Text(
+                          "${report.totalCoffees.toString()}",
+                          style: TextStyle(fontSize: 128.0),
+                        )
+                      : Text("No coffees"),
+                ),
+                Container(
+                  height: 350,
+                  child: PageView.builder(
+                    controller: _favoritesController,
+                    itemCount: data != null ? data.length : 0,
+                    itemBuilder: (BuildContext context, int index) {
+                      return AnimatedBuilder(
+                        animation: _favoritesController,
+                        builder: (BuildContext context, Widget widget) {
+                          double value = 1.0;
+                          if (_favoritesController.position.haveDimensions) {
+                            value = _favoritesController.page - index;
+                            value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
+                          }
+                          return Center(
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 36.0, top: 36.0),
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 16.0,
+                                    color: Colors.black54,
+                                    offset: Offset(20, 10),
+                                  ),
+                                ],
+                              ),
+                              height: Curves.easeInOut.transform(value) * 300,
+                              width: Curves.easeInOut.transform(value) * 200,
+                              child: ClipRRect(
+                                child: widget,
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                            ),
+                          );
+                        },
+                        child: InkWell(
+                          onTap: () {
+                            _addCoffee();
+                          },
+                          splashColor: Theme.of(context).splashColor,
+                          child: CachedNetworkImage(
+                            imageUrl: data[index]["urls"]["small"],
+                            placeholder: (context, url) =>
+                                Center(child: CircularProgressIndicator()),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
           ),
-          Container(
-            color: Colors.blue,
-          ),
+          GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+              ),
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  elevation: 10.0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned.fill(
+                          child: CachedNetworkImage(
+                            fit: BoxFit.cover,
+                            imageUrl: data[index]["urls"]["regular"],
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Container(
+                                  height: 32,
+                                  alignment: Alignment.centerLeft,
+                                  padding: EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    data[index]["user"]["first_name"] +
+                                        " " +
+                                        data[index]["user"]["last_name"],
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }),
         ],
       ),
     );
