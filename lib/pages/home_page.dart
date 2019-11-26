@@ -187,19 +187,29 @@ class _HomePageState extends State<HomePage>
                             ),
                           );
                         },
-                        child: InkWell(
-                          onTap: () {
-                            _addCoffee();
-                          },
-                          splashColor: Theme.of(context).splashColor,
-                          child: CachedNetworkImage(
-                            imageUrl: data[index]["urls"]["small"],
-                            placeholder: (context, url) =>
-                                Center(child: CircularProgressIndicator()),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
-                            fit: BoxFit.cover,
-                          ),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: CachedNetworkImage(
+                                imageUrl: data[index]["urls"]["small"],
+                                placeholder: (context, url) =>
+                                    Center(child: CircularProgressIndicator()),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    _addCoffee();
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       );
                     },
