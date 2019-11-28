@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:jitter/models/report.dart';
 import 'package:jitter/services/firebase_auth_service.dart';
 import 'package:jitter/services/globals.dart';
+import 'package:jitter/widgets/ScaleRoute.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -201,7 +202,14 @@ class _HomePageState extends State<HomePage>
                                       color: Colors.white,
                                       child: InkWell(
                                         onTap: () {
-                                          _addCoffee();
+                                          Navigator.of(context).push(
+                                            ScaleRoute(
+                                              page: Scaffold(
+                                                backgroundColor: Colors.white,
+                                                appBar: AppBar(),
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Icon(
                                           FontAwesomeIcons.plus,
