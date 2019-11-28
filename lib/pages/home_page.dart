@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage>
   TabController _tabController;
 
   List data;
+  List favorites;
 
   PageController _favoritesController;
 
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage>
     _tabController = TabController(vsync: this, length: 2);
     getJSONData();
     _favoritesController =
-        PageController(initialPage: 1, viewportFraction: 0.6);
+        PageController(initialPage: 1, viewportFraction: 0.6, keepPage: true);
   }
 
   Future<String> getAccessKey() async {
@@ -53,7 +54,13 @@ class _HomePageState extends State<HomePage>
       int itemCount = jsonResponse["total"];
       print("Number of images about coffee: $itemCount.");
       setState(() {
+        favorites = [0];
         data = jsonResponse["results"];
+        favorites.addAll(data);
+        if (favorites.length > 1) {
+          _favoritesController.animateToPage(1,
+              duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
+        }
       });
     } else {
       print("Request failed with status: ${response.statusCode}.");
@@ -142,21 +149,20 @@ class _HomePageState extends State<HomePage>
         controller: _tabController,
         children: [
           Center(
-            child: ListView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Center(
-                  child: report != null
-                      ? Text(
-                          "${report.totalCoffees.toString()}",
-                          style: TextStyle(fontSize: 128.0),
-                        )
-                      : Text("No coffees"),
-                ),
+                report != null
+                    ? Text(
+                        "${report.totalCoffees.toString()}",
+                        style: TextStyle(fontSize: 128.0),
+                      )
+                    : Text("No coffees"),
                 Container(
                   height: 350,
                   child: PageView.builder(
                     controller: _favoritesController,
-                    itemCount: data != null ? data.length : 0,
+                    itemCount: data != null ? favorites.length : 0,
                     itemBuilder: (BuildContext context, int index) {
                       return AnimatedBuilder(
                         animation: _favoritesController,
@@ -187,30 +193,50 @@ class _HomePageState extends State<HomePage>
                             ),
                           );
                         },
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: CachedNetworkImage(
-                                imageUrl: data[index]["urls"]["small"],
-                                placeholder: (context, url) =>
-                                    Center(child: CircularProgressIndicator()),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
-                                fit: BoxFit.cover,
+                        child: index == 0
+                            ? Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: Material(
+                                      color: Colors.white,
+                                      child: InkWell(
+                                        onTap: () {
+                                          _addCoffee();
+                                        },
+                                        child: Icon(
+                                          FontAwesomeIcons.plus,
+                                          size: 64,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: CachedNetworkImage(
+                                      imageUrl: favorites[index]["urls"]
+                                          ["small"],
+                                      placeholder: (context, url) => Center(
+                                          child: CircularProgressIndicator()),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned.fill(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          _addCoffee();
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
-                            ),
-                            Positioned.fill(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    _addCoffee();
-                                  },
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
                       );
                     },
                   ),
