@@ -32,9 +32,18 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 2);
-    getJSONData();
     _favoritesController =
         PageController(initialPage: 1, viewportFraction: 0.6, keepPage: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Report report = Provider.of<Report>(context);
+    favorites = [0];
+    if (report != null) {
+      favorites.addAll(report.favorites);
+    }
   }
 
   Future<String> getAccessKey() async {
@@ -57,11 +66,11 @@ class _HomePageState extends State<HomePage>
       setState(() {
         favorites = [0];
         data = jsonResponse["results"];
-        favorites.addAll(data);
-        if (favorites.length > 1) {
-          _favoritesController.animateToPage(1,
-              duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
-        }
+//        favorites.addAll(data);
+//        if (favorites.length > 1) {
+//          _favoritesController.animateToPage(1,
+//              duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
+//        }
       });
     } else {
       print("Request failed with status: ${response.statusCode}.");
@@ -163,7 +172,7 @@ class _HomePageState extends State<HomePage>
                   height: 350,
                   child: PageView.builder(
                     controller: _favoritesController,
-                    itemCount: data != null ? favorites.length : 0,
+                    itemCount: favorites.length,
                     itemBuilder: (BuildContext context, int index) {
                       return AnimatedBuilder(
                         animation: _favoritesController,
@@ -224,8 +233,7 @@ class _HomePageState extends State<HomePage>
                                 children: [
                                   Positioned.fill(
                                     child: CachedNetworkImage(
-                                      imageUrl: favorites[index]["urls"]
-                                          ["small"],
+                                      imageUrl: favorites[index]["imageURL"],
                                       placeholder: (context, url) => Center(
                                           child: CircularProgressIndicator()),
                                       errorWidget: (context, url, error) =>
